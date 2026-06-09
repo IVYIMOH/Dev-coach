@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Coach — AI Learning Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="logo-dot">dc</div>
+      <span class="app-name">Dev Coach</span>
+    </div>
+    <div class="tab-bar">
+      <button class="tab active" id="tab-all">All</button>
+      <button class="tab" id="tab-skills">Skills</button>
+      <button class="tab" id="tab-100days">100 Days</button>
+      <button class="tab" id="tab-projects">Projects</button>
+      <button class="tab" id="tab-jobs">Jobs</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="chat-panel">
+      <div class="chat-messages" id="chatMessages"></div>
+
+      <div class="quick-actions" id="quickActions">
+        <button class="qa-btn" data-action="What should I focus on today?">📅 Today's focus</button>
+        <button class="qa-btn" data-action="Give me a progress summary">📊 Progress summary</button>
+        <button class="qa-btn" data-action="What skill should I learn next?">🧠 Next skill?</button>
+        <button class="qa-btn" data-action="Any job application tips?">💼 Job tips</button>
+      </div>
+
+      <div class="input-area">
+        <div class="input-wrap">
+          <textarea id="userInput" placeholder="Add a skill, log a coding day, track a project or job…" rows="1"></textarea>
+        </div>
+        <button class="send-btn" id="sendBtn" title="Send">&#10148;</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-content" id="sidebarContent">
+        </div>
+      <button class="clear-btn" id="clearBtn">↺ reset all data</button>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
