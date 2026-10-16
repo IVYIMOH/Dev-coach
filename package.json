@@ -1,0 +1,28 @@
+{
+  "name": "dev-coach",
+  "version": "1.0.0",
+  "description": "Dev Coach — 21-day product-engineer challenge tracker with an AI accountability coach",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0"
+  },
+  "keywords": [
+    "pwa",
+    "accountability",
+    "ai-coach",
+    "product-engineer",
+    "challenge-tracker"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+

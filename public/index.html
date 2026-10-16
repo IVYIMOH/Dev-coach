@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2c5f2e">
+  <meta name="description" content="Dev Coach — 21-Day Product-Engineer Challenge Tracker with AI Accountability Coach">
+  <title>Dev Coach — 21-Day Product Engineer Challenge</title>
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+
+  <!-- Google Fonts: DM Mono, Instrument Sans, Instrument Serif -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="top-bar" role="banner">
+    <div class="top-bar-left">
+      <div class="logo-dot" aria-hidden="true">dc</div>
+      <div class="app-title-group">
+        <h1 class="app-name">Dev Coach</h1>
+        <span class="app-sub">21-Day Product Engineer</span>
+      </div>
+    </div>
+
+    <div class="top-bar-right">
+      <!-- Persona Switcher -->
+      <div class="persona-select-wrap">
+        <select id="personaSelect" class="persona-select" aria-label="Select AI Coach Persona">
+          <option value="pragmatist">Alex (The Pragmatist)</option>
+          <option value="sergeant">Sarge Vera (Drill Sergeant)</option>
+          <option value="architect">Dr. Chen (Systems Architect)</option>
+        </select>
+      </div>
+
+      <!-- Daily Standup Quick Trigger -->
+      <button type="button" id="standupBtn" class="nav-btn primary" aria-label="Start Daily Standup">
+        📋 Daily Standup
+      </button>
+
+      <!-- Speech / Sound Toggle -->
+      <button type="button" id="soundToggleBtn" class="nav-btn" aria-label="Toggle Coach Voice Speech">
+        🔊 Voice On
+      </button>
+
+      <!-- Light / Dark Theme Toggle -->
+      <button type="button" id="themeToggleBtn" class="nav-btn" aria-label="Toggle Light and Dark Mode">
+        🌙 Dark
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Viewport Layout -->
+  <main class="layout" role="main">
+    
+    <!-- Left Column: Interactive Chat & Coach Avatar -->
+    <section class="chat-panel" aria-label="AI Coach Chat and Status">
+      
+      <!-- Coach Persona Banner -->
+      <div class="coach-header-card">
+        <div id="coachAvatarContainer" class="coach-avatar-container"></div>
+        <div class="coach-info">
+          <div class="coach-meta">
+            <span id="coachHeaderName" class="coach-name">Alex Cole</span>
+            <span id="coachHeaderTitle" class="coach-title">The Pragmatic Lead</span>
+          </div>
+          <p id="coachTagline" class="coach-tagline">"Ship it, measure real usage, iterate without ego."</p>
+        </div>
+      </div>
+
+      <!-- Messages History -->
+      <div id="chatMessagesContainer" class="chat-messages" role="log" aria-live="polite"></div>
+
+      <!-- Typing Indicator -->
+      <div id="chatTypingIndicator" class="chat-typing-indicator" aria-hidden="true">
+        <span>Coach is thinking...</span>
+      </div>
+
+      <!-- Quick Action Chips -->
+      <div class="quick-chips-bar" role="toolbar" aria-label="Quick Conversation Actions">
+        <button type="button" class="quick-chip" data-action="standup">📋 Run Standup</button>
+        <button type="button" class="quick-chip" data-action="recap">📊 Weekly Recap</button>
+        <button type="button" class="quick-chip" data-action="finished today's task">✅ Finished today's task</button>
+        <button type="button" class="quick-chip" data-action="pomodoro">⏱ Start Pomodoro</button>
+        <button type="button" class="quick-chip" data-action="add a task on day 5: read about RLS">➕ Add task on day 5</button>
+        <button type="button" class="quick-chip" data-action="What should I prioritize today?">🎯 Today's focus</button>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="chat-input-area">
+        <form id="chatForm" class="chat-input-form" autocomplete="off">
+          <input
+            type="text"
+            id="chatInput"
+            class="chat-input-field"
+            placeholder="Tell your coach what you finished, ask a question, or add a task..."
+            aria-label="Message your coach"
+            required
+          />
+          <button type="submit" id="sendChatBtn" class="chat-send-btn" aria-label="Send message">
+            ➤
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Right Column: 21-Day Tracker & Accountability Tools -->
+    <aside class="tracker-sidebar" aria-label="Challenge Tracker and Utilities">
+      <div class="sidebar-scroll">
+        
+        <!-- Streak Card -->
+        <div class="sidebar-card streak-card">
+          <span class="section-label">Accountability Streak</span>
+          <div class="streak-numbers">
+            <span id="currentStreakVal" class="streak-big-num">0 Days</span>
+            <span id="longestStreakVal" class="streak-sub-stat">Best: 0 Days</span>
+          </div>
+          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="streakProgressBar" class="progress-fill" style="width: 0%"></div>
+          </div>
+          <div id="totalProgressVal" class="progress-label">0/21 Days (0%)</div>
+        </div>
+
+        <!-- Weekly Recap Card -->
+        <div class="sidebar-card recap-card">
+          <span class="section-label">Weekly Checkpoint</span>
+          <div id="weeklyRecapTitle" class="recap-title">Week 1: Foundations & Architecture</div>
+          <div id="weeklyRecapStats" class="recap-stats">0/7 days complete • 0/14 tasks finished (0%)</div>
+          <button type="button" id="weeklyRecapBtn" class="recap-action-btn quick-chip" data-action="recap">
+            Request Coach Review →
+          </button>
+        </div>
+
+        <!-- 21-Day Challenge Grid -->
+        <div class="sidebar-card">
+          <div class="card-header-flex">
+            <span class="section-label">21-Day Roadmap</span>
+            <button type="button" id="setCurrentDayBtn" class="btn-secondary" title="Mark selected day as current active day">
+              ★ Set as Today
+            </button>
+          </div>
+          <div id="daySelectorGrid" class="day-grid" role="grid" aria-label="21-Day Challenge Grid"></div>
+        </div>
+
+        <!-- Day Task Checklist -->
+        <div class="sidebar-card">
+          <div class="card-header-flex">
+            <span id="currentDayHeading" class="section-label">Day 1 Tasks</span>
+          </div>
+          <div id="taskListContainer" class="task-list"></div>
+
+          <!-- Add Custom Task Form -->
+          <form id="addTaskForm" class="add-task-form">
+            <input
+              type="text"
+              id="newTaskInput"
+              class="add-task-input"
+              placeholder="+ Add task to this day..."
+              aria-label="Add task title"
+              required
+            />
+            <button type="submit" class="add-task-btn">Add</button>
+          </form>
+        </div>
+
+        <!-- Pomodoro Mode Widget -->
+        <div class="sidebar-card">
+          <div class="pomo-header-row">
+            <span class="section-label">Pomodoro Timer</span>
+            <span id="pomoModeBadge" class="pomo-badge work">Focus (25m)</span>
+          </div>
+          <div id="pomoTimeDisplay" class="pomo-time-display" aria-live="polite">25:00</div>
+          <div class="pomo-progress-track">
+            <div id="pomoProgressBar" class="pomo-progress-bar" style="width: 0%"></div>
+          </div>
+          <div class="pomo-controls">
+            <button type="button" id="pomoStartBtn" class="pomo-btn primary">Start</button>
+            <button type="button" id="pomoPauseBtn" class="pomo-btn">Pause</button>
+            <button type="button" id="pomoResetBtn" class="pomo-btn">Reset</button>
+          </div>
+        </div>
+
+        <!-- Notification & Persistence Settings -->
+        <div class="sidebar-card">
+          <span class="section-label">Settings & Backup</span>
+          <div class="settings-list" style="margin-top: 8px;">
+            <div class="setting-row">
+              <span>Morning Plan:</span>
+              <input type="time" id="morningTimeInput" class="time-input" value="09:00" aria-label="Morning check-in time">
+            </div>
+            <div class="setting-row">
+              <span>Evening Check-in:</span>
+              <input type="time" id="eveningTimeInput" class="time-input" value="18:00" aria-label="Evening check-in time">
+            </div>
+            <div class="setting-row">
+              <span>Browser Alerts:</span>
+              <span id="notifStatusText" style="font-family: var(--mono); font-size: 11px;">Checking...</span>
+            </div>
+            <button type="button" id="enableNotifsBtn" class="btn-secondary" style="width: 100%;">
+              Enable Notifications 🔔
+            </button>
+          </div>
+
+          <!-- Progress Data Backup -->
+          <div class="btn-group" style="margin-top: 14px;">
+            <button type="button" id="exportDataBtn" class="btn-secondary" aria-label="Export progress JSON">
+              💾 Export JSON
+            </button>
+            <button type="button" id="importDataBtn" class="btn-secondary" aria-label="Import progress JSON">
+              📥 Import JSON
+            </button>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;" aria-hidden="true">
+            <button type="button" id="resetDataBtn" class="btn-danger" aria-label="Reset challenge progress">
+              ↺ Reset
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- App Bootstrap ES Module -->
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
+
