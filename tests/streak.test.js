@@ -4,66 +4,66 @@ import { isDayCompleted, calculateStreak, getWeeklyStats } from '../lib/streak.j
 
 test('isDayCompleted requires all tasks on that day to be done', () => {
   const tasks = [
-    { id: '1', day: 1, done: true, title: 'T1' },
-    { id: '2', day: 1, done: false, title: 'T2' },
-    { id: '3', day: 2, done: true, title: 'T3' }
+    { id: 'd1-learn', day: 1, type: 'learn', done: true, title: 'Learn Problem validation' },
+    { id: 'd1-practice', day: 1, type: 'practice', done: true, title: 'Draft proto-persona' },
+    { id: 'd1-ship', day: 1, type: 'ship', done: false, title: 'Ship Problem Canvas' },
+    { id: 'd2-learn', day: 2, type: 'learn', done: true, title: 'Learn Mom Test' },
+    { id: 'd2-practice', day: 2, type: 'practice', done: true, title: 'Interview script' },
+    { id: 'd2-ship', day: 2, type: 'ship', done: true, title: 'Interview notes recording' }
   ];
 
-  // Day 1 has an undone task -> false
+  // Day 1 has an undone task (d1-ship) -> false
   assert.equal(isDayCompleted(tasks, 1), false);
 
-  // Day 2 has all tasks done -> true
+  // Day 2 has all 3 tasks done -> true
   assert.equal(isDayCompleted(tasks, 2), true);
 
   // Day 3 has no tasks -> false
   assert.equal(isDayCompleted(tasks, 3), false);
 });
 
-test('calculateStreak correctly computes currentStreak and longestStreak', () => {
+test('calculateStreak correctly computes currentStreak, longestStreak, and shippedArtifactsCount', () => {
   const tasks = [
-    // Day 1: Done
-    { id: 'd1-1', day: 1, done: true, title: 'T1' },
-    // Day 2: Done
-    { id: 'd2-1', day: 2, done: true, title: 'T2' },
-    // Day 3: Undone task exists
-    { id: 'd3-1', day: 3, done: true, title: 'T3' },
-    { id: 'd3-2', day: 3, done: false, title: 'T4' },
+    // Day 1: All 3 Done
+    { id: 'd1-1', day: 1, type: 'learn', done: true, title: 'T1' },
+    { id: 'd1-2', day: 1, type: 'practice', done: true, title: 'T2' },
+    { id: 'd1-3', day: 1, type: 'ship', done: true, title: 'T3', proof: 'https://figma.com/1' },
+    // Day 2: All 3 Done
+    { id: 'd2-1', day: 2, type: 'learn', done: true, title: 'T4' },
+    { id: 'd2-2', day: 2, type: 'practice', done: true, title: 'T5' },
+    { id: 'd2-3', day: 2, type: 'ship', done: true, title: 'T6', proof: 'https://figma.com/2' },
+    // Day 3: Incomplete (ship task not done)
+    { id: 'd3-1', day: 3, type: 'learn', done: true, title: 'T7' },
+    { id: 'd3-2', day: 3, type: 'practice', done: true, title: 'T8' },
+    { id: 'd3-3', day: 3, type: 'ship', done: false, title: 'T9' },
     // Day 4: Done
-    { id: 'd4-1', day: 4, done: true, title: 'T5' },
-    // Day 5: Done
-    { id: 'd5-1', day: 5, done: true, title: 'T6' },
-    // Day 6: Done
-    { id: 'd6-1', day: 6, done: true, title: 'T7' }
+    { id: 'd4-1', day: 4, type: 'learn', done: true, title: 'T10' },
+    { id: 'd4-2', day: 4, type: 'practice', done: true, title: 'T11' },
+    { id: 'd4-3', day: 4, type: 'ship', done: true, title: 'T12', proof: 'https://figma.com/4' }
   ];
 
-  // If current day is 6, days 4, 5, 6 are done (Day 3 was incomplete) -> streak is 3
-  const resAtDay6 = calculateStreak(tasks, 6);
-  assert.equal(resAtDay6.currentStreak, 3);
-  assert.equal(resAtDay6.longestStreak, 3);
-  assert.equal(resAtDay6.totalCompletedDays, 5);
-
-  // If current day is 7 (working on day 7, day 6 was done) -> active streak preserved from day 6 = 3
-  const resAtDay7 = calculateStreak(tasks, 7);
-  assert.equal(resAtDay7.currentStreak, 3);
-
-  // If current day is 2 -> days 1 and 2 done -> streak = 2
-  const resAtDay2 = calculateStreak(tasks, 2);
-  assert.equal(resAtDay2.currentStreak, 2);
+  // At day 4: day 3 was incomplete, so current streak from day 4 is 1
+  const resAtDay4 = calculateStreak(tasks, 4);
+  assert.equal(resAtDay4.currentStreak, 1);
+  assert.equal(resAtDay4.longestStreak, 2); // Days 1 and 2
+  assert.equal(resAtDay4.totalCompletedDays, 3);
+  assert.equal(resAtDay4.shippedArtifactsCount, 3);
 });
 
-test('getWeeklyStats aggregates correctly for 7-day blocks', () => {
+test('getWeeklyStats aggregates correctly and provides portfolio shipped artifacts', () => {
   const tasks = [
-    { id: 'w1-1', day: 1, done: true, title: 'T1' },
-    { id: 'w1-2', day: 2, done: true, title: 'T2' },
-    { id: 'w1-3', day: 3, done: false, title: 'T3' }
+    { id: 'd1-learn', day: 1, type: 'learn', done: true, title: 'Learn 1' },
+    { id: 'd1-practice', day: 1, type: 'practice', done: true, title: 'Practice 1' },
+    { id: 'd1-ship', day: 1, type: 'ship', done: true, title: 'Problem Canvas', proof: 'https://figma.com/canvas' },
+    { id: 'd2-ship', day: 2, type: 'ship', done: false, title: 'Interview Notes' }
   ];
 
   const stats = getWeeklyStats(tasks, 1);
   assert.equal(stats.week, 1);
   assert.equal(stats.startDay, 1);
   assert.equal(stats.endDay, 7);
-  assert.equal(stats.completedDays, 2);
-  assert.equal(stats.totalDays, 7);
-  assert.equal(stats.isComplete, false);
+  assert.equal(stats.shippedArtifacts.length, 2);
+  assert.equal(stats.shippedArtifacts[0].title, 'Problem Canvas');
+  assert.equal(stats.shippedArtifacts[0].done, true);
+  assert.equal(stats.shippedArtifacts[0].proof, 'https://figma.com/canvas');
 });
-

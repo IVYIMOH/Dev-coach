@@ -14,41 +14,57 @@ async function verify() {
   const health = await healthRes.json();
   console.log('[Verification] /api/health:', health);
 
-  // 2. Chat with mock: "finished the TypeScript task"
-  const chat1 = await fetch(`${baseUrl}/api/chat`, {
+  // 2. Chat with mock: Attempt to finish a ship task without proof -> coach asks for proof
+  const chatProofDemand = await fetch(`${baseUrl}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      message: 'finished the TypeScript task',
+      message: 'finished the ship task',
       persona: 'sergeant',
       currentDay: 1,
       tasks: [
-        { id: 'd1-t1', day: 1, title: 'Configure TypeScript compiler', done: false }
+        { id: 'd1-ship', day: 1, type: 'ship', title: 'Ship Problem Canvas', done: false, proof: '' }
       ]
     })
   });
-  const data1 = await chat1.json();
-  console.log('[Verification] Chat DONE test:', data1);
+  const dataProofDemand = await chatProofDemand.json();
+  console.log('[Verification] Proof demand on ship task:', dataProofDemand);
 
-  // 3. Chat with mock: "add a task on day 5: read about RLS"
-  const chat2 = await fetch(`${baseUrl}/api/chat`, {
+  // 3. Chat with mock: Supply proof and finish ship task
+  const chatWithProof = await fetch(`${baseUrl}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      message: 'add a task on day 5: read about RLS',
-      persona: 'pragmatist',
+      message: 'finished the Ship Problem Canvas, here is the proof: https://figma.com/file/123',
+      persona: 'sergeant',
+      currentDay: 1,
+      tasks: [
+        { id: 'd1-ship', day: 1, type: 'ship', title: 'Ship Problem Canvas', done: false, proof: '' }
+      ]
+    })
+  });
+  const dataWithProof = await chatWithProof.json();
+  console.log('[Verification] Ship task with proof:', dataWithProof);
+
+  // 4. Critique Mode test
+  const critiqueRes = await fetch(`${baseUrl}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: 'critique this design: modal with pricing tiers and subscribe button',
+      persona: 'mentor',
       currentDay: 1,
       tasks: []
     })
   });
-  const data2 = await chat2.json();
-  console.log('[Verification] Chat ADD_TASK test:', data2);
+  const critiqueData = await critiqueRes.json();
+  console.log('[Verification] Critique Mode response:', critiqueData);
 
-  // 4. Avatar video stub
+  // 5. Avatar video stub
   const videoRes = await fetch(`${baseUrl}/api/avatar-video`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: 'Hello', persona: 'architect' })
+    body: JSON.stringify({ text: 'Hello', persona: 'mentor' })
   });
   const videoData = await videoRes.json();
   console.log('[Verification] Avatar video stub:', videoData);
@@ -61,4 +77,3 @@ verify().catch(err => {
   console.error('[Verification] Failed:', err);
   process.exit(1);
 });
-

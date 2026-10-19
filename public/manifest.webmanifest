@@ -1,7 +1,7 @@
 {
-  "name": "Dev Coach",
-  "short_name": "DevCoach",
-  "description": "21-Day Product-Engineer Challenge Tracker with AI Accountability Coach",
+  "name": "Design Coach",
+  "short_name": "DesignCoach",
+  "description": "21-Day Product Designer Challenge Tracker with AI Accountability Coach",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7f5f0",
@@ -21,4 +21,3 @@
     }
   ]
 }
-

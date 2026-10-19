@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   '/js/streak.js',
   '/js/speech.js',
   '/js/avatar.js',
+  '/js/critique.js',
   '/js/standup.js',
   '/js/pomodoro.js',
   '/js/notifications.js',

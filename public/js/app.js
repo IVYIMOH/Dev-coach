@@ -1,5 +1,5 @@
 /**
- * Dev Coach - Main Application Controller
+ * Design Coach - Main Application Controller
  * Vanilla JS with ES modules. Safe DOM manipulation (textContent, zero innerHTML).
  */
 
@@ -9,34 +9,33 @@ import { coachAvatar } from './avatar.js';
 import { speechEngine } from './speech.js';
 import { calculateStreak, getWeeklyStats, isDayCompleted } from './streak.js';
 import { DailyStandup } from './standup.js';
+import { DesignCritiqueModal } from './critique.js';
 import { PomodoroTimer } from './pomodoro.js';
 import { notificationManager } from './notifications.js';
 
-class App {
+class DesignCoachApp {
   constructor() {
     this.state = null;
     this.selectedDay = 1;
     this.isChatBusy = false;
     this.pomodoro = null;
     this.standup = null;
+    this.critiqueModal = null;
   }
 
   async init() {
-    // 1. Load persisted state
     this.state = await Storage.getState();
     this.selectedDay = this.state.currentDay || 1;
 
-    // 2. Initialize sound engine and theme
     speechEngine.setMuted(this.state.soundMuted);
     this.applyTheme(this.state.theme);
 
-    // 3. Initialize Coach Avatar
     const avatarContainer = document.getElementById('coachAvatarContainer');
     coachAvatar.renderCoach(avatarContainer, this.state.persona);
 
-    // 4. Initialize Pomodoro Engine
+    // Pomodoro Engine (Focus 25/5)
     this.pomodoro = new PomodoroTimer({
-      getPersona: () => PERSONAS[this.state.persona] || PERSONAS.pragmatist,
+      getPersona: () => PERSONAS[this.state.persona] || PERSONAS.sergeant,
       onTick: (status) => this.renderPomodoroStatus(status),
       onComplete: (mode) => {
         if (mode === 'work') {
@@ -47,24 +46,26 @@ class App {
       }
     });
 
-    // 5. Initialize Daily Standup Engine
+    // Daily Standup Engine
     this.standup = new DailyStandup({
-      getPersona: () => PERSONAS[this.state.persona] || PERSONAS.pragmatist,
+      getPersona: () => PERSONAS[this.state.persona] || PERSONAS.sergeant,
       onFinish: (summaryText) => {
         this.sendChatMessage(summaryText);
       }
     });
 
-    // 6. Setup Notification Scheduler
+    // Design Critique Modal
+    this.critiqueModal = new DesignCritiqueModal({
+      onSubmit: (critiquePrompt) => {
+        this.sendChatMessage(critiquePrompt);
+      }
+    });
+
+    // Scheduled Notifications
     notificationManager.startScheduler(() => this.state);
 
-    // 7. Wire DOM Event Listeners
     this.bindEvents();
-
-    // 8. Render All Views
     this.renderAll();
-
-    // 9. Register Service Worker for PWA & Offline
     this.registerServiceWorker();
   }
 
@@ -111,7 +112,7 @@ class App {
     const greeting = persona.greetings[Math.floor(Math.random() * persona.greetings.length)]
       .replace('{day}', this.state.currentDay);
 
-    this.appendMessage('ai', `${persona.name} switched in: "${greeting}"`, persona.name);
+    this.appendMessage('ai', `${persona.name}: "${greeting}"`, persona.name);
     coachAvatar.speak(greeting, persona);
   }
 
@@ -120,18 +121,13 @@ class App {
   }
 
   bindEvents() {
-    // Theme toggle
     document.getElementById('themeToggleBtn')?.addEventListener('click', () => this.toggleTheme());
-
-    // Sound toggle
     document.getElementById('soundToggleBtn')?.addEventListener('click', () => this.toggleSound());
 
-    // Persona Selector
     document.getElementById('personaSelect')?.addEventListener('change', (e) => {
       this.changePersona(e.target.value);
     });
 
-    // Chat form submission
     const chatForm = document.getElementById('chatForm');
     const chatInput = document.getElementById('chatInput');
     chatForm?.addEventListener('submit', (e) => {
@@ -148,6 +144,8 @@ class App {
         const action = btn.getAttribute('data-action');
         if (action === 'standup') {
           this.standup.start();
+        } else if (action === 'critique') {
+          this.critiqueModal.open();
         } else if (action === 'recap') {
           this.requestWeeklyRecap();
         } else if (action === 'pomodoro') {
@@ -158,12 +156,11 @@ class App {
       });
     });
 
-    // Daily Standup header button
-    document.getElementById('standupBtn')?.addEventListener('click', () => {
-      this.standup.start();
-    });
+    // Standup and Critique top-bar triggers
+    document.getElementById('standupBtn')?.addEventListener('click', () => this.standup.start());
+    document.getElementById('critiqueBtn')?.addEventListener('click', () => this.critiqueModal.open());
 
-    // Day selector grid click
+    // Day selector grid
     const daySelector = document.getElementById('daySelectorGrid');
     daySelector?.addEventListener('click', (e) => {
       const dayBtn = e.target.closest('.day-pill');
@@ -183,8 +180,8 @@ class App {
       this.saveState();
       this.renderDayGrid();
       this.renderStats();
-      const persona = PERSONAS[this.state.persona] || PERSONAS.pragmatist;
-      this.appendMessage('ai', `Active challenge day set to Day ${this.selectedDay}. Let's focus on today's tasks!`, persona.name);
+      const persona = PERSONAS[this.state.persona] || PERSONAS.sergeant;
+      this.appendMessage('ai', `Active design sprint set to Day ${this.selectedDay}. Let's make every pixel count!`, persona.name);
     });
 
     // Add custom task form
@@ -192,14 +189,17 @@ class App {
     addTaskForm?.addEventListener('submit', (e) => {
       e.preventDefault();
       const titleInput = document.getElementById('newTaskInput');
+      const typeSelect = document.getElementById('newTaskTypeSelect');
       const title = titleInput.value.trim();
       if (!title) return;
 
       const newTask = {
         id: `custom-${Date.now().toString(36)}`,
         day: this.selectedDay,
+        type: typeSelect?.value || 'practice',
         title,
         done: false,
+        proof: '',
         note: ''
       };
 
@@ -232,9 +232,9 @@ class App {
           this.state = res.state;
           this.selectedDay = this.state.currentDay;
           this.renderAll();
-          alert('Progress successfully restored from backup!');
+          alert('Design Coach progress restored successfully!');
         } else {
-          alert(`Failed to import backup: ${res.error}`);
+          alert(`Import failed: ${res.error}`);
         }
       };
       reader.readAsText(file);
@@ -242,7 +242,7 @@ class App {
     });
 
     document.getElementById('resetDataBtn')?.addEventListener('click', async () => {
-      if (confirm('Are you sure you want to reset all 21-day progress back to initial state?')) {
+      if (confirm('Reset all 21-day Design Coach tasks and progress back to initial curriculum?')) {
         this.state = await Storage.resetState();
         this.selectedDay = 1;
         this.renderAll();
@@ -285,7 +285,7 @@ class App {
   }
 
   renderPersonaInfo() {
-    const persona = PERSONAS[this.state.persona] || PERSONAS.pragmatist;
+    const persona = PERSONAS[this.state.persona] || PERSONAS.sergeant;
     const personaSelect = document.getElementById('personaSelect');
     if (personaSelect) personaSelect.value = persona.id;
 
@@ -303,7 +303,6 @@ class App {
     const container = document.getElementById('daySelectorGrid');
     if (!container) return;
 
-    // Clear safely
     while (container.firstChild) container.removeChild(container.firstChild);
 
     for (let day = 1; day <= 21; day++) {
@@ -330,7 +329,7 @@ class App {
 
       btn.appendChild(numSpan);
       btn.appendChild(iconSpan);
-      btn.setAttribute('aria-label', `Day ${day}: ${isDone ? 'Completed' : 'Pending'}${isCurrent ? ', Active Day' : ''}`);
+      btn.setAttribute('aria-label', `Day ${day}: ${isDone ? 'Completed' : 'In Progress'}${isCurrent ? ', Today' : ''}`);
 
       container.appendChild(btn);
     }
@@ -353,7 +352,7 @@ class App {
     if (dayTasks.length === 0) {
       const emptyDiv = document.createElement('div');
       emptyDiv.className = 'task-empty-state';
-      emptyDiv.textContent = 'No tasks recorded for this day yet. Add one below!';
+      emptyDiv.textContent = 'No tasks for this day yet. Add one below!';
       container.appendChild(emptyDiv);
       return;
     }
@@ -373,24 +372,62 @@ class App {
       checkBtn.textContent = task.done ? '✓' : '';
 
       checkBtn.addEventListener('click', () => {
+        // PROOF REQUIREMENT FOR SHIP TASKS:
+        // The coach asks for proof before praising/signing off on a Ship task.
+        if (!task.done && task.type === 'ship' && !task.proof) {
+          const userProof = prompt(
+            `Proof Required for Ship Task:\n"${task.title}"\n\nPlease enter your Figma URL, Notion link, or artifact note:`
+          );
+          if (userProof && userProof.trim()) {
+            task.proof = userProof.trim();
+          } else {
+            alert('A Ship task requires proof (Figma link, document URL, or artifact note) before it can count toward your streak.');
+            return;
+          }
+        }
+
         task.done = !task.done;
         this.saveState();
         this.renderTaskList();
         this.renderDayGrid();
         this.renderStats();
 
-        // If completing a day, celebrate in voice!
+        // If day completed, trigger coach praise!
         if (task.done && isDayCompleted(this.state.tasks, this.selectedDay)) {
-          const persona = PERSONAS[this.state.persona] || PERSONAS.pragmatist;
-          const celebration = `Day ${this.selectedDay} fully accomplished! Outstanding execution.`;
+          const persona = PERSONAS[this.state.persona] || PERSONAS.sergeant;
+          let celebration = `Day ${this.selectedDay} fully accomplished! Great design execution.`;
+          if (persona.id === 'sergeant') {
+            celebration = `Day ${this.selectedDay} locked and loaded! All 3 tasks verified with proof. Keep up this relentless pace!`;
+          } else if (persona.id === 'hype') {
+            celebration = `YASSS! Day ${this.selectedDay} is 100% complete! Your portfolio is leveling up so fast!`;
+          }
           this.appendMessage('ai', celebration, persona.name);
           coachAvatar.speak(celebration, persona);
         }
       });
 
-      // Title & Note Container
+      // Text and badges wrap
       const textWrap = document.createElement('div');
       textWrap.className = 'task-text-wrap';
+
+      // Type Badge (Learn, Practice, Ship)
+      const badgeRow = document.createElement('div');
+      badgeRow.className = 'task-badge-row';
+
+      const typeBadge = document.createElement('span');
+      typeBadge.className = `task-type-badge ${task.type || 'practice'}`;
+      typeBadge.textContent = task.type === 'ship' ? 'Ship 🚀' : (task.type === 'learn' ? 'Learn 45m' : 'Practice');
+      badgeRow.appendChild(typeBadge);
+
+      if (task.proof) {
+        const proofTag = document.createElement('span');
+        proofTag.className = 'task-proof-tag';
+        proofTag.textContent = `✓ Proof: ${task.proof.length > 28 ? task.proof.slice(0, 28) + '…' : task.proof}`;
+        proofTag.title = task.proof;
+        badgeRow.appendChild(proofTag);
+      }
+
+      textWrap.appendChild(badgeRow);
 
       const titleSpan = document.createElement('div');
       titleSpan.className = 'task-title';
@@ -403,6 +440,22 @@ class App {
         noteSpan.textContent = `Note: ${task.note}`;
         textWrap.appendChild(noteSpan);
       }
+
+      // Proof / Edit Button
+      const proofBtn = document.createElement('button');
+      proofBtn.type = 'button';
+      proofBtn.className = 'task-attach-proof-btn';
+      proofBtn.textContent = task.proof ? 'Edit Proof' : '+ Proof';
+      proofBtn.setAttribute('aria-label', `Attach proof to task: ${task.title}`);
+      proofBtn.addEventListener('click', () => {
+        const newProof = prompt(`Attach Figma link or artifact note for:\n"${task.title}"`, task.proof || '');
+        if (newProof !== null) {
+          task.proof = newProof.trim();
+          this.saveState();
+          this.renderTaskList();
+          this.renderStats();
+        }
+      });
 
       // Delete Task Button
       const deleteBtn = document.createElement('button');
@@ -420,6 +473,7 @@ class App {
 
       item.appendChild(checkBtn);
       item.appendChild(textWrap);
+      item.appendChild(proofBtn);
       item.appendChild(deleteBtn);
 
       container.appendChild(item);
@@ -433,15 +487,15 @@ class App {
     if (streakVal) streakVal.textContent = `${stats.currentStreak} Days`;
 
     const longestVal = document.getElementById('longestStreakVal');
-    if (longestVal) longestVal.textContent = `${stats.longestStreak} Days`;
+    if (longestVal) longestVal.textContent = `Best: ${stats.longestStreak} Days`;
 
     const progressVal = document.getElementById('totalProgressVal');
-    if (progressVal) progressVal.textContent = `${stats.totalCompletedDays}/21 Days (${stats.progressPercent}%)`;
+    if (progressVal) progressVal.textContent = `${stats.totalCompletedDays}/21 Days (${stats.progressPercent}%) • ${stats.shippedArtifactsCount} Shipped Artifacts`;
 
     const progressBar = document.getElementById('streakProgressBar');
     if (progressBar) progressBar.style.width = `${stats.progressPercent}%`;
 
-    // Render Weekly Recap Box
+    // Weekly Recap with Portfolio Progress
     const currentWeek = Math.min(3, Math.ceil(this.state.currentDay / 7));
     const weekStats = getWeeklyStats(this.state.tasks, currentWeek);
 
@@ -451,6 +505,46 @@ class App {
     const recapStats = document.getElementById('weeklyRecapStats');
     if (recapStats) {
       recapStats.textContent = `${weekStats.completedDays}/7 days complete • ${weekStats.completedTasks}/${weekStats.totalTasks} tasks finished (${weekStats.percent}%)`;
+    }
+
+    // Portfolio Progress Line in Weekly Recap
+    const portfolioContainer = document.getElementById('weeklyPortfolioProgress');
+    if (portfolioContainer) {
+      while (portfolioContainer.firstChild) portfolioContainer.removeChild(portfolioContainer.firstChild);
+
+      const header = document.createElement('div');
+      header.className = 'portfolio-progress-header';
+      header.textContent = 'Portfolio Progress (Shipped Artifacts):';
+      portfolioContainer.appendChild(header);
+
+      const shipped = weekStats.shippedArtifacts.filter(a => a.done);
+      if (shipped.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'portfolio-empty-note';
+        empty.textContent = 'No artifacts shipped yet this week. Complete your Ship tasks with proof!';
+        portfolioContainer.appendChild(empty);
+      } else {
+        const list = document.createElement('ul');
+        list.className = 'portfolio-artifacts-list';
+        shipped.forEach(art => {
+          const li = document.createElement('li');
+          const strong = document.createElement('strong');
+          strong.textContent = `Day ${art.day}: `;
+          li.appendChild(strong);
+
+          const titleText = document.createTextNode(art.title);
+          li.appendChild(titleText);
+
+          if (art.proof) {
+            const proofBadge = document.createElement('span');
+            proofBadge.className = 'portfolio-proof-link';
+            proofBadge.textContent = ` [Proof: ${art.proof}]`;
+            li.appendChild(proofBadge);
+          }
+          list.appendChild(li);
+        });
+        portfolioContainer.appendChild(list);
+      }
     }
   }
 
@@ -481,7 +575,6 @@ class App {
 
     wrap.appendChild(sender);
     wrap.appendChild(bubble);
-
     container.appendChild(wrap);
   }
 
@@ -497,7 +590,6 @@ class App {
     if (!Array.isArray(this.state.messages)) this.state.messages = [];
     this.state.messages.push(msg);
 
-    // Keep last 100 messages to prevent storage bloat
     if (this.state.messages.length > 100) {
       this.state.messages = this.state.messages.slice(-100);
     }
@@ -538,20 +630,16 @@ class App {
       const reply = data.reply || 'Message received.';
       const actions = Array.isArray(data.actions) ? data.actions : [];
 
-      // Apply returned actions safely
       this.applyCoachActions(actions);
 
-      // Render coach reply
-      const persona = PERSONAS[this.state.persona] || PERSONAS.pragmatist;
+      const persona = PERSONAS[this.state.persona] || PERSONAS.sergeant;
       this.appendMessage('ai', reply, persona.name);
-
-      // Speak reply aloud
       coachAvatar.speak(reply, persona);
 
     } catch (err) {
       console.error('Chat error:', err);
-      const persona = PERSONAS[this.state.persona] || PERSONAS.pragmatist;
-      this.appendMessage('ai', `Connection issue: ${err.message}. Retrying or working offline.`, persona.name);
+      const persona = PERSONAS[this.state.persona] || PERSONAS.sergeant;
+      this.appendMessage('ai', `Connection note: ${err.message}. Operating in offline tracker mode.`, persona.name);
     } finally {
       this.setChatBusy(false);
     }
@@ -577,12 +665,20 @@ class App {
           task.done = false;
           modified = true;
         }
+      } else if (type === 'ADD_PROOF' && data?.id && data?.proof) {
+        const task = this.state.tasks.find(t => t.id === data.id);
+        if (task) {
+          task.proof = String(data.proof).slice(0, 500);
+          modified = true;
+        }
       } else if (type === 'ADD_TASK' && data?.title) {
         const newTask = {
           id: `task-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
           day: Math.min(21, Math.max(1, Number(data.day) || this.selectedDay)),
+          type: ['learn', 'practice', 'ship'].includes(data.type) ? data.type : 'practice',
           title: String(data.title).slice(0, 200),
           done: false,
+          proof: data.proof ? String(data.proof).slice(0, 500) : '',
           note: data.note ? String(data.note).slice(0, 500) : ''
         };
         this.state.tasks.push(newTask);
@@ -607,9 +703,17 @@ class App {
   requestWeeklyRecap() {
     const currentWeek = Math.min(3, Math.ceil(this.state.currentDay / 7));
     const stats = getWeeklyStats(this.state.tasks, currentWeek);
-    const persona = PERSONAS[this.state.persona] || PERSONAS.pragmatist;
+    const shippedTitles = stats.shippedArtifacts.filter(a => a.done).map(a => `• Day ${a.day}: ${a.title} (Proof: ${a.proof || 'Attached'})`).join('\n');
 
-    const query = `Please provide a weekly recap and tactical review for ${stats.title}. Currently ${stats.completedDays} of 7 days completed, and ${stats.completedTasks} of ${stats.totalTasks} tasks done.`;
+    const query = [
+      `Weekly Recap & Portfolio Review Request for ${stats.title}:`,
+      `• Challenge Days Complete: ${stats.completedDays} of 7`,
+      `• Tasks Finished: ${stats.completedTasks} of ${stats.totalTasks} (${stats.percent}%)`,
+      `• Portfolio Shipped Artifacts:`,
+      shippedTitles || 'None shipped yet this week',
+      `Please provide an in-persona critique of our week's momentum and advice for the next sprint.`
+    ].join('\n');
+
     this.sendChatMessage(query);
   }
 
@@ -633,7 +737,7 @@ class App {
     if (display) display.textContent = status.formatted;
     if (bar) bar.style.width = `${status.progress}%`;
     if (modeBadge) {
-      modeBadge.textContent = status.mode === 'work' ? 'Focus (25m)' : 'Rest (5m)';
+      modeBadge.textContent = status.mode === 'work' ? 'Design Sprint (25m)' : 'Creative Break (5m)';
       modeBadge.className = `pomo-badge ${status.mode}`;
     }
     if (startBtn) {
@@ -658,7 +762,7 @@ class App {
         statusText.style.color = 'var(--accent)';
         if (enableBtn) enableBtn.textContent = 'Test Notification 🔔';
       } else if (perm === 'denied') {
-        statusText.textContent = 'Blocked in browser permissions';
+        statusText.textContent = 'Blocked in browser settings';
         statusText.style.color = '#c0392b';
       } else {
         statusText.textContent = 'Permission not requested';
@@ -678,9 +782,7 @@ class App {
   }
 }
 
-// Bootstrap application on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
-  const app = new App();
+  const app = new DesignCoachApp();
   app.init();
 });
-

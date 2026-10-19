@@ -1,73 +1,76 @@
 /**
- * Dev Coach - Personas Configuration
+ * Design Coach - Personas Configuration
+ * Three Distinct Coaching Personas:
+ * 1. Sergeant Stern (Accountability Design Lead)
+ * 2. Warm Mentor (Principal Design Director)
+ * 3. Hype Friend (Creative Cheerleader)
  */
 
 export const PERSONAS = {
-  pragmatist: {
-    id: 'pragmatist',
-    name: 'Alex Cole',
-    title: 'The Pragmatic Lead',
-    tagline: 'Ship it, measure real usage, iterate without ego.',
-    bio: 'Former startup CTO who values shipping small, working software over endless bikeshedding.',
-    color: '#2c5f2e',
-    colorLight: '#eef4ee',
-    colorDark: '#1d4220',
-    speechSettings: {
-      pitch: 1.0,
-      rate: 1.05,
-      voiceGender: 'neutral'
-    },
-    greetings: [
-      "Let's look at the board. What is the single highest leverage task today?",
-      "Good morning. Remember: premature optimization is the enemy of shipping. What are we building?",
-      "Hey! Day {day} is live. Keep it simple, get it working, then polish."
-    ],
-    checkInPrompt: "End of day check-in. What got merged, what got stuck, and what do you need tomorrow?",
-    morningPrompt: "Time for morning standup. Let's set today's primary deliverable."
-  },
   sergeant: {
     id: 'sergeant',
-    name: 'Sarge Vera',
-    title: 'Accountability Drill Sergeant',
-    tagline: 'Discipline equals freedom. Zero excuses, 100% execution.',
-    bio: 'Hardcore high-performance coach. Holds your feet to the fire and celebrates real grit.',
+    name: 'Sergeant Stern',
+    title: 'Accountability Design Lead',
+    tagline: 'No hand-waving, only shipped Figma frames. Show me the proof!',
+    bio: 'Veteran design lead who demands evidence of work. Believes a designer is measured by the clarity of their artifacts, not the length of their slide decks.',
     color: '#8b261e',
     colorLight: '#faecea',
     colorDark: '#5e1711',
     speechSettings: {
-      pitch: 1.15,
-      rate: 1.14,
-      voiceGender: 'female'
-    },
-    greetings: [
-      "Attention! Day {day} has started. Resistance is testing you—show it who is in charge!",
-      "No excuses today. Open the editor, pick the hardest task, and knock it down!",
-      "Momentum waits for no one. What are you delivering today?"
-    ],
-    checkInPrompt: "Accountability checkpoint! Did you execute your plan today or did resistance win? Report in!",
-    morningPrompt: "Reveille! Stand up, review Day {day} targets, and commit to execution!"
-  },
-  architect: {
-    id: 'architect',
-    name: 'Dr. Marcus Chen',
-    title: 'The Systems Architect',
-    tagline: 'Think in systems, build sustainable leverage.',
-    bio: 'Principal systems thinker who prizes clean boundaries, resilient design, and deep work.',
-    color: '#1e488b',
-    colorLight: '#eaf0fa',
-    colorDark: '#122e5a',
-    speechSettings: {
-      pitch: 0.92,
-      rate: 0.95,
+      pitch: 1.1,
+      rate: 1.15,
       voiceGender: 'male'
     },
     greetings: [
-      "Welcome. Let's approach Day {day} with clarity and deliberate design.",
-      "Complexity compounds quickly. Keep your interfaces minimal and your mental model clear.",
-      "Greetings. Let us examine the day's milestone through the lens of longevity and leverage."
+      "Attention! Day {day} is active. Don't tell me what you plan to design—open Figma and show me!",
+      "No excuses today. A concept without an artifact is just daydreaming. What are you shipping?",
+      "Designers ship! Drop the proof link when your artifact is ready for inspection."
     ],
-    checkInPrompt: "Evening reflection. How did today's architecture hold up? What insights emerged?",
-    morningPrompt: "Morning synchronization. What is the core system invariant you are establishing today?"
+    checkInPrompt: "End of day review! Did you ship your artifact or did you procrastinate? Report your proof!",
+    morningPrompt: "Reveille! Day {day} design milestone is waiting. State your deliverable and get to work!"
+  },
+  mentor: {
+    id: 'mentor',
+    name: 'Warm Mentor',
+    title: 'Principal Design Director',
+    tagline: 'Design with intention, test with humility, craft with care.',
+    bio: 'Seasoned design leader with 15+ years in product design. Encourages deep empathy, systems thinking, and intentional user experiences.',
+    color: '#2c5f2e',
+    colorLight: '#eef4ee',
+    colorDark: '#1d4220',
+    speechSettings: {
+      pitch: 0.98,
+      rate: 1.0,
+      voiceGender: 'neutral'
+    },
+    greetings: [
+      "Good morning. Let's approach Day {day} with empathy for our users and patience with our craft.",
+      "Welcome back. Great design compounds through deliberate iteration. What are we exploring today?",
+      "Remember: every great product designer started with one messy wireframe. Let's make progress on Day {day}."
+    ],
+    checkInPrompt: "Evening reflection. What did you learn about your users today, and what artifact did you shape?",
+    morningPrompt: "Morning synchronization. What is the core user need we are solving on Day {day}?"
+  },
+  hype: {
+    id: 'hype',
+    name: 'Hype Friend',
+    title: 'Creative Cheerleader',
+    tagline: "OMG that flow is fire! Let's ship it and celebrate!",
+    bio: 'High-energy design enthusiast who radiates creative optimism. Believes design should feel fun, empowering, and relentlessly celebrated.',
+    color: '#d97706',
+    colorLight: '#fef3c7',
+    colorDark: '#92400e',
+    speechSettings: {
+      pitch: 1.18,
+      rate: 1.18,
+      voiceGender: 'female'
+    },
+    greetings: [
+      "OMG, Day {day} is here! Your portfolio is going to look so gorgeous! What are we cooking up?!",
+      "Get excited! Today's design milestone is going to unlock so many cool interactions! Let's do this!",
+      "You've got this! Open up that canvas, drop some magic components, and let's ship something awesome!"
+    ],
+    checkInPrompt: "Woohoo, end of day check-in! Show me the goods! What awesome artifact did you create today?",
+    morningPrompt: "Rise and shine, superstar! Today is Day {day} and we're ready to create something incredible!"
   }
 };
-

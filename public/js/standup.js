@@ -1,5 +1,5 @@
 /**
- * Dev Coach - Daily Standup Flow
+ * Design Coach - Daily Standup Flow
  * Coach asks 3 questions out loud, takes answers by text or speech recognition,
  * and passes the answers to the coach chat loop for task updates.
  */
@@ -10,21 +10,21 @@ import { speechEngine } from './speech.js';
 export const STANDUP_QUESTIONS = [
   {
     step: 1,
-    title: 'What did you finish recently?',
-    placeholder: 'e.g., Drafted schema and ERD, setup TypeScript and ESLint...',
-    speechText: 'Question one: What did you finish recently?'
+    title: 'What design artifact did you ship recently?',
+    placeholder: 'e.g., Shipped Problem Canvas on Day 1, drafted user interview script...',
+    speechText: 'Question one: What design artifact did you ship recently?'
   },
   {
     step: 2,
-    title: 'What is blocking you or slowing you down?',
-    placeholder: 'e.g., Confused about RLS policies, waiting on API keys, or no blockers...',
-    speechText: 'Question two: What is blocking you or slowing down your progress?'
+    title: 'What is blocking you or slowing your design flow?',
+    placeholder: 'e.g., Unsure about auto layout nesting, waiting on user feedback, or no blockers...',
+    speechText: 'Question two: What is blocking you or slowing your design flow?'
   },
   {
     step: 3,
-    title: 'What is your single most important task for today?',
-    placeholder: 'e.g., Implement user authentication and test RLS policies...',
-    speechText: 'Question three: What is your single most important task for today?'
+    title: 'What is your one core design task for today?',
+    placeholder: 'e.g., Build the button and card component variants in Figma...',
+    speechText: 'Question three: What is your one core design task for today?'
   }
 ];
 
@@ -45,7 +45,6 @@ export class DailyStandup {
   }
 
   showStep() {
-    // Remove existing modal if any
     if (this.modalEl && this.modalEl.parentNode) {
       this.modalEl.parentNode.removeChild(this.modalEl);
     }
@@ -62,7 +61,7 @@ export class DailyStandup {
     const card = document.createElement('div');
     card.className = 'standup-card';
 
-    // Header with step badge
+    // Header
     const header = document.createElement('div');
     header.className = 'standup-header';
 
@@ -80,14 +79,14 @@ export class DailyStandup {
     header.appendChild(closeBtn);
     card.appendChild(header);
 
-    // Question Title
+    // Title
     const title = document.createElement('h3');
     title.id = 'standup-title';
     title.className = 'standup-title';
     title.textContent = question.title;
     card.appendChild(title);
 
-    // Textarea for Answer
+    // Textarea
     const textarea = document.createElement('textarea');
     textarea.className = 'standup-textarea';
     textarea.placeholder = question.placeholder;
@@ -95,11 +94,11 @@ export class DailyStandup {
     textarea.setAttribute('aria-label', question.title);
     card.appendChild(textarea);
 
-    // Controls Row (Mic + Buttons)
+    // Controls
     const controls = document.createElement('div');
     controls.className = 'standup-controls';
 
-    // Speech Recognition Mic Button
+    // Mic Button
     const micBtn = document.createElement('button');
     micBtn.type = 'button';
     micBtn.className = 'standup-mic-btn';
@@ -144,7 +143,7 @@ export class DailyStandup {
 
     controls.appendChild(micBtn);
 
-    // Action button (Next or Finish)
+    // Next / Submit Button
     const actionBtn = document.createElement('button');
     actionBtn.type = 'button';
     actionBtn.className = 'standup-next-btn';
@@ -172,26 +171,25 @@ export class DailyStandup {
     document.body.appendChild(overlay);
     this.modalEl = overlay;
 
-    // Speak Question Aloud
+    // Speak aloud
     coachAvatar.speak(question.speechText, persona);
 
-    // Auto-focus input
     setTimeout(() => textarea.focus(), 150);
   }
 
   finish() {
     this.close();
-    const [finished, blockers, focus] = this.answers;
+    const [shipped, blockers, focus] = this.answers;
 
     const summary = [
-      `Daily Standup Check-in:`,
-      `• Completed: ${finished || 'None reported'}`,
-      `• Blockers: ${blockers || 'None, path is clear'}`,
-      `• Today's Focus: ${focus || 'Continue current challenge milestone'}`
+      `Daily Standup Report:`,
+      `• Shipped Artifact: ${shipped || 'None reported yet'}`,
+      `• Blockers: ${blockers || 'None, design canvas is clear'}`,
+      `• Today's Core Focus: ${focus || 'Advance current design challenge milestone'}`
     ].join('\n');
 
     if (this.onFinish) {
-      this.onFinish(summary, { finished, blockers, focus });
+      this.onFinish(summary, { shipped, blockers, focus });
     }
   }
 
@@ -206,4 +204,3 @@ export class DailyStandup {
     }
   }
 }
-

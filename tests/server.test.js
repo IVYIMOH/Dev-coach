@@ -59,11 +59,11 @@ test('POST /api/chat responds with JSON reply and actions in mock mode', async (
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      message: 'finished the TypeScript task',
+      message: 'finished the interview script',
       persona: 'sergeant',
-      currentDay: 1,
+      currentDay: 2,
       tasks: [
-        { id: 'd1-t1', day: 1, done: false, title: 'TypeScript compiler configuration' }
+        { id: 'd2-practice', day: 2, type: 'practice', done: false, title: 'Draft interview script' }
       ]
     })
   });
@@ -73,14 +73,14 @@ test('POST /api/chat responds with JSON reply and actions in mock mode', async (
   assert.equal(typeof data.reply, 'string');
   assert.ok(Array.isArray(data.actions));
   assert.equal(data.actions[0].type, 'DONE');
-  assert.equal(data.actions[0].data.id, 'd1-t1');
+  assert.equal(data.actions[0].data.id, 'd2-practice');
 });
 
 test('POST /api/avatar-video returns 501 when no provider key configured', async () => {
   const res = await fetch(`${baseUrl}/api/avatar-video`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: 'Hello', persona: 'pragmatist' })
+    body: JSON.stringify({ text: 'Hello', persona: 'mentor' })
   });
   assert.equal(res.status, 501);
   const data = await res.json();
@@ -93,4 +93,3 @@ test('Security headers include Content-Security-Policy', async () => {
   assert.ok(csp, 'CSP header should be present');
   assert.ok(csp.includes("default-src 'self'"));
 });
-

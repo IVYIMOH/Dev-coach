@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#2c5f2e">
-  <meta name="description" content="Dev Coach — 21-Day Product-Engineer Challenge Tracker with AI Accountability Coach">
-  <title>Dev Coach — 21-Day Product Engineer Challenge</title>
+  <meta name="description" content="Design Coach — 21-Day Product Designer Challenge Tracker with AI Accountability Coach">
+  <title>Design Coach — 21-Day Product Designer Challenge</title>
   
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
@@ -25,8 +25,8 @@
     <div class="top-bar-left">
       <div class="logo-dot" aria-hidden="true">dc</div>
       <div class="app-title-group">
-        <h1 class="app-name">Dev Coach</h1>
-        <span class="app-sub">21-Day Product Engineer</span>
+        <h1 class="app-name">Design Coach</h1>
+        <span class="app-sub">21-Day Product Designer</span>
       </div>
     </div>
 
@@ -34,11 +34,16 @@
       <!-- Persona Switcher -->
       <div class="persona-select-wrap">
         <select id="personaSelect" class="persona-select" aria-label="Select AI Coach Persona">
-          <option value="pragmatist">Alex (The Pragmatist)</option>
-          <option value="sergeant">Sarge Vera (Drill Sergeant)</option>
-          <option value="architect">Dr. Chen (Systems Architect)</option>
+          <option value="sergeant">Sergeant Stern (Accountability)</option>
+          <option value="mentor">Warm Mentor (Design Director)</option>
+          <option value="hype">Hype Friend (Cheerleader)</option>
         </select>
       </div>
+
+      <!-- Critique Mode Trigger -->
+      <button type="button" id="critiqueBtn" class="nav-btn critique" aria-label="Request Design Critique">
+        🎨 Design Critique
+      </button>
 
       <!-- Daily Standup Quick Trigger -->
       <button type="button" id="standupBtn" class="nav-btn primary" aria-label="Start Daily Standup">
@@ -68,10 +73,10 @@
         <div id="coachAvatarContainer" class="coach-avatar-container"></div>
         <div class="coach-info">
           <div class="coach-meta">
-            <span id="coachHeaderName" class="coach-name">Alex Cole</span>
-            <span id="coachHeaderTitle" class="coach-title">The Pragmatic Lead</span>
+            <span id="coachHeaderName" class="coach-name">Sergeant Stern</span>
+            <span id="coachHeaderTitle" class="coach-title">Accountability Design Lead</span>
           </div>
-          <p id="coachTagline" class="coach-tagline">"Ship it, measure real usage, iterate without ego."</p>
+          <p id="coachTagline" class="coach-tagline">"No hand-waving, only shipped Figma frames. Show me the proof!"</p>
         </div>
       </div>
 
@@ -80,17 +85,17 @@
 
       <!-- Typing Indicator -->
       <div id="chatTypingIndicator" class="chat-typing-indicator" aria-hidden="true">
-        <span>Coach is thinking...</span>
+        <span>Coach is inspecting your design artifacts...</span>
       </div>
 
       <!-- Quick Action Chips -->
       <div class="quick-chips-bar" role="toolbar" aria-label="Quick Conversation Actions">
         <button type="button" class="quick-chip" data-action="standup">📋 Run Standup</button>
+        <button type="button" class="quick-chip critique" data-action="critique">🎨 Design Critique</button>
         <button type="button" class="quick-chip" data-action="recap">📊 Weekly Recap</button>
-        <button type="button" class="quick-chip" data-action="finished today's task">✅ Finished today's task</button>
-        <button type="button" class="quick-chip" data-action="pomodoro">⏱ Start Pomodoro</button>
-        <button type="button" class="quick-chip" data-action="add a task on day 5: read about RLS">➕ Add task on day 5</button>
-        <button type="button" class="quick-chip" data-action="What should I prioritize today?">🎯 Today's focus</button>
+        <button type="button" class="quick-chip" data-action="pomodoro">⏱ Focus Sprint (25m)</button>
+        <button type="button" class="quick-chip" data-action="finished user research synthesis">✅ Finished synthesis</button>
+        <button type="button" class="quick-chip" data-action="add a task on day 5: sketch onboarding flow">➕ Add task on day 5</button>
       </div>
 
       <!-- Chat Input Area -->
@@ -100,7 +105,7 @@
             type="text"
             id="chatInput"
             class="chat-input-field"
-            placeholder="Tell your coach what you finished, ask a question, or add a task..."
+            placeholder="Tell your coach what you designed, share proof links, or ask for critique..."
             aria-label="Message your coach"
             required
           />
@@ -125,14 +130,18 @@
           <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div id="streakProgressBar" class="progress-fill" style="width: 0%"></div>
           </div>
-          <div id="totalProgressVal" class="progress-label">0/21 Days (0%)</div>
+          <div id="totalProgressVal" class="progress-label">0/21 Days (0%) • 0 Shipped Artifacts</div>
         </div>
 
-        <!-- Weekly Recap Card -->
+        <!-- Weekly Recap Card with Portfolio Progress -->
         <div class="sidebar-card recap-card">
           <span class="section-label">Weekly Checkpoint</span>
-          <div id="weeklyRecapTitle" class="recap-title">Week 1: Foundations & Architecture</div>
-          <div id="weeklyRecapStats" class="recap-stats">0/7 days complete • 0/14 tasks finished (0%)</div>
+          <div id="weeklyRecapTitle" class="recap-title">Week 1: Research, Strategy & Architecture</div>
+          <div id="weeklyRecapStats" class="recap-stats">0/7 days complete • 0/21 tasks finished (0%)</div>
+          
+          <!-- Portfolio Progress Line -->
+          <div id="weeklyPortfolioProgress" class="portfolio-progress-wrap"></div>
+
           <button type="button" id="weeklyRecapBtn" class="recap-action-btn quick-chip" data-action="recap">
             Request Coach Review →
           </button>
@@ -141,7 +150,7 @@
         <!-- 21-Day Challenge Grid -->
         <div class="sidebar-card">
           <div class="card-header-flex">
-            <span class="section-label">21-Day Roadmap</span>
+            <span class="section-label">21-Day Sprint Roadmap</span>
             <button type="button" id="setCurrentDayBtn" class="btn-secondary" title="Mark selected day as current active day">
               ★ Set as Today
             </button>
@@ -158,6 +167,11 @@
 
           <!-- Add Custom Task Form -->
           <form id="addTaskForm" class="add-task-form">
+            <select id="newTaskTypeSelect" class="task-type-select" aria-label="Task Type">
+              <option value="practice">Practice</option>
+              <option value="learn">Learn</option>
+              <option value="ship">Ship 🚀</option>
+            </select>
             <input
               type="text"
               id="newTaskInput"
@@ -170,11 +184,11 @@
           </form>
         </div>
 
-        <!-- Pomodoro Mode Widget -->
+        <!-- Pomodoro Focus Mode Widget -->
         <div class="sidebar-card">
           <div class="pomo-header-row">
-            <span class="section-label">Pomodoro Timer</span>
-            <span id="pomoModeBadge" class="pomo-badge work">Focus (25m)</span>
+            <span class="section-label">Focus Sprint Timer</span>
+            <span id="pomoModeBadge" class="pomo-badge work">Design Sprint (25m)</span>
           </div>
           <div id="pomoTimeDisplay" class="pomo-time-display" aria-live="polite">25:00</div>
           <div class="pomo-progress-track">
@@ -228,8 +242,7 @@
 
   </main>
 
-  <!-- App Bootstrap ES Module -->
+  <!-- App Bootstrap Module -->
   <script type="module" src="/js/app.js"></script>
 </body>
 </html>
-

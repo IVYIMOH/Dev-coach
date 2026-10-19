@@ -1,5 +1,5 @@
 /**
- * Dev Coach - Avatar Engine
+ * Design Coach - Avatar Engine
  * Renders an animated SVG coach avatar behind an interface (renderCoach, speak).
  * Supports talking animations, blinking, persona variations, and reduced-motion mode.
  * Safe DOM rendering (createElementNS, zero innerHTML).
@@ -21,28 +21,27 @@ function createSvgElement(name, attrs = {}) {
 export class CoachAvatar {
   constructor() {
     this.container = null;
-    this.personaKey = 'pragmatist';
+    this.personaKey = 'sergeant';
     this.isSpeaking = false;
     this.avatarSvg = null;
     this.mouthEl = null;
     this.glassesEl = null;
+    this.beretEl = null;
     this.headbandEl = null;
     this.accentRingEl = null;
-    this.speechBubbleEl = null;
-    this.videoMode = false;
+    this.bodyEl = null;
   }
 
   /**
    * Mounts the coach avatar into a target container.
    * @param {HTMLElement} container
-   * @param {string} [initialPersona='pragmatist']
+   * @param {string} [initialPersona='sergeant']
    */
-  renderCoach(container, initialPersona = 'pragmatist') {
+  renderCoach(container, initialPersona = 'sergeant') {
     if (!container) return;
     this.container = container;
     this.personaKey = initialPersona;
 
-    // Clear previous children safely
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
@@ -50,9 +49,8 @@ export class CoachAvatar {
     const wrapper = document.createElement('div');
     wrapper.className = 'coach-avatar-wrapper';
     wrapper.setAttribute('role', 'img');
-    wrapper.setAttribute('aria-label', `Animated AI Coach: ${PERSONAS[this.personaKey]?.name || 'Coach'}`);
+    wrapper.setAttribute('aria-label', `Animated AI Design Coach: ${PERSONAS[this.personaKey]?.name || 'Coach'}`);
 
-    // Build SVG Avatar
     const svg = createSvgElement('svg', {
       viewBox: '0 0 160 160',
       class: 'coach-svg',
@@ -60,32 +58,25 @@ export class CoachAvatar {
       height: '120'
     });
 
-    // Gradients & Defs
     const defs = createSvgElement('defs');
 
-    // Pragmatist gradient (Forest Green)
-    const gradPrag = createSvgElement('linearGradient', { id: 'grad-prag', x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
-    const stop1 = createSvgElement('stop', { offset: '0%', 'stop-color': '#3e8441' });
-    const stop2 = createSvgElement('stop', { offset: '100%', 'stop-color': '#1f4821' });
-    gradPrag.appendChild(stop1);
-    gradPrag.appendChild(stop2);
-    defs.appendChild(gradPrag);
+    // Sergeant Stern gradient (Disciplined Crimson)
+    const gradStern = createSvgElement('linearGradient', { id: 'grad-stern', x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
+    gradStern.appendChild(createSvgElement('stop', { offset: '0%', 'stop-color': '#9e2a2b' }));
+    gradStern.appendChild(createSvgElement('stop', { offset: '100%', 'stop-color': '#540b0e' }));
+    defs.appendChild(gradStern);
 
-    // Sergeant gradient (Crimson)
-    const gradSarge = createSvgElement('linearGradient', { id: 'grad-sarge', x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
-    const sStop1 = createSvgElement('stop', { offset: '0%', 'stop-color': '#b3392f' });
-    const sStop2 = createSvgElement('stop', { offset: '100%', 'stop-color': '#6c1b14' });
-    gradSarge.appendChild(sStop1);
-    gradSarge.appendChild(sStop2);
-    defs.appendChild(gradSarge);
+    // Warm Mentor gradient (Forest Green & Sage)
+    const gradMentor = createSvgElement('linearGradient', { id: 'grad-mentor', x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
+    gradMentor.appendChild(createSvgElement('stop', { offset: '0%', 'stop-color': '#2c5f2e' }));
+    gradMentor.appendChild(createSvgElement('stop', { offset: '100%', 'stop-color': '#132a13' }));
+    defs.appendChild(gradMentor);
 
-    // Architect gradient (Deep Blue)
-    const gradArch = createSvgElement('linearGradient', { id: 'grad-arch', x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
-    const aStop1 = createSvgElement('stop', { offset: '0%', 'stop-color': '#2a65b8' });
-    const aStop2 = createSvgElement('stop', { offset: '100%', 'stop-color': '#122c54' });
-    gradArch.appendChild(aStop1);
-    gradArch.appendChild(aStop2);
-    defs.appendChild(gradArch);
+    // Hype Friend gradient (Golden Amber & Coral)
+    const gradHype = createSvgElement('linearGradient', { id: 'grad-hype', x1: '0%', y1: '0%', x2: '100%', y2: '100%' });
+    gradHype.appendChild(createSvgElement('stop', { offset: '0%', 'stop-color': '#f59e0b' }));
+    gradHype.appendChild(createSvgElement('stop', { offset: '100%', 'stop-color': '#b45309' }));
+    defs.appendChild(gradHype);
 
     svg.appendChild(defs);
 
@@ -103,19 +94,18 @@ export class CoachAvatar {
     svg.appendChild(this.accentRingEl);
 
     // Coach Body / Shoulders
-    const body = createSvgElement('path', {
+    this.bodyEl = createSvgElement('path', {
       d: 'M 35 145 C 35 115, 60 105, 80 105 C 100 105, 125 115, 125 145 Z',
       class: 'coach-body',
-      fill: 'url(#grad-prag)'
+      fill: 'url(#grad-stern)'
     });
-    this.bodyEl = body;
-    svg.appendChild(body);
+    svg.appendChild(this.bodyEl);
 
     // Shirt Collar
     const collar = createSvgElement('path', {
       d: 'M 65 112 L 80 126 L 95 112 Z',
       fill: '#ffffff',
-      opacity: '0.85'
+      opacity: '0.9'
     });
     svg.appendChild(collar);
 
@@ -126,7 +116,7 @@ export class CoachAvatar {
       width: '16',
       height: '18',
       rx: '4',
-      fill: '#e8c9ad'
+      fill: '#eec19a'
     });
     svg.appendChild(neck);
 
@@ -137,22 +127,30 @@ export class CoachAvatar {
       width: '64',
       height: '66',
       rx: '28',
-      fill: '#ffd8be',
+      fill: '#fcd5b5',
       class: 'coach-head'
     });
     svg.appendChild(head);
 
-    // Hair
+    // Base Hair
     const hair = createSvgElement('path', {
       d: 'M 44 52 C 44 26, 116 26, 116 52 C 104 38, 56 38, 44 52 Z',
-      fill: '#2b2622'
+      fill: '#292524'
     });
     svg.appendChild(hair);
 
-    // Sarge Headband (toggled by persona)
+    // Sergeant Beret Hat
+    this.beretEl = createSvgElement('path', {
+      d: 'M 40 46 C 40 28, 100 22, 122 36 C 128 42, 116 52, 90 50 C 60 48, 46 54, 40 46 Z',
+      fill: '#333d29',
+      class: 'coach-beret'
+    });
+    svg.appendChild(this.beretEl);
+
+    // Hype Friend Headband
     this.headbandEl = createSvgElement('path', {
       d: 'M 46 48 Q 80 44 114 48 L 114 54 Q 80 50 46 54 Z',
-      fill: '#e74c3c',
+      fill: '#ec4899',
       class: 'coach-headband'
     });
     svg.appendChild(this.headbandEl);
@@ -167,11 +165,11 @@ export class CoachAvatar {
     svg.appendChild(leftGlint);
     svg.appendChild(rightGlint);
 
-    // Architect Glasses (toggled by persona)
+    // Warm Mentor Designer Glasses
     const glassesGroup = createSvgElement('g', { class: 'coach-glasses' });
-    const glassL = createSvgElement('circle', { cx: '66', cy: '64', r: '10', fill: 'none', stroke: '#1b3a6b', 'stroke-width': '2' });
-    const glassR = createSvgElement('circle', { cx: '94', cy: '64', r: '10', fill: 'none', stroke: '#1b3a6b', 'stroke-width': '2' });
-    const bridge = createSvgElement('line', { x1: '76', y1: '64', x2: '84', y2: '64', stroke: '#1b3a6b', 'stroke-width': '2' });
+    const glassL = createSvgElement('circle', { cx: '66', cy: '64', r: '10', fill: 'none', stroke: '#2c5f2e', 'stroke-width': '2.2' });
+    const glassR = createSvgElement('circle', { cx: '94', cy: '64', r: '10', fill: 'none', stroke: '#2c5f2e', 'stroke-width': '2.2' });
+    const bridge = createSvgElement('line', { x1: '76', y1: '64', x2: '84', y2: '64', stroke: '#2c5f2e', 'stroke-width': '2.2' });
     glassesGroup.appendChild(glassL);
     glassesGroup.appendChild(glassR);
     glassesGroup.appendChild(bridge);
@@ -179,8 +177,8 @@ export class CoachAvatar {
     svg.appendChild(glassesGroup);
 
     // Cheeks
-    const leftCheek = createSvgElement('circle', { cx: '58', cy: '72', r: '5', fill: '#ff9999', opacity: '0.4' });
-    const rightCheek = createSvgElement('circle', { cx: '102', cy: '72', r: '5', fill: '#ff9999', opacity: '0.4' });
+    const leftCheek = createSvgElement('circle', { cx: '58', cy: '72', r: '5', fill: '#f43f5e', opacity: '0.35' });
+    const rightCheek = createSvgElement('circle', { cx: '102', cy: '72', r: '5', fill: '#f43f5e', opacity: '0.35' });
     svg.appendChild(leftCheek);
     svg.appendChild(rightCheek);
 
@@ -198,42 +196,41 @@ export class CoachAvatar {
     this.avatarSvg = svg;
     wrapper.appendChild(svg);
 
-    // Status Indicator Badge (Speech state)
+    // Status Indicator Badge
     const badge = document.createElement('div');
     badge.className = 'coach-status-badge';
-    badge.setAttribute('title', 'Coach Ready');
+    badge.setAttribute('title', 'Design Coach Ready');
     this.badgeEl = badge;
     wrapper.appendChild(badge);
 
     container.appendChild(wrapper);
-
     this.updatePersonaVisuals(this.personaKey);
   }
 
-  /**
-   * Updates avatar accessory elements for selected persona.
-   * @param {string} personaKey
-   */
   updatePersonaVisuals(personaKey) {
     this.personaKey = personaKey;
-    const persona = PERSONAS[personaKey] || PERSONAS.pragmatist;
+    const persona = PERSONAS[personaKey] || PERSONAS.sergeant;
 
     if (this.bodyEl) {
-      if (personaKey === 'sergeant') {
-        this.bodyEl.setAttribute('fill', 'url(#grad-sarge)');
-      } else if (personaKey === 'architect') {
-        this.bodyEl.setAttribute('fill', 'url(#grad-arch)');
+      if (personaKey === 'mentor') {
+        this.bodyEl.setAttribute('fill', 'url(#grad-mentor)');
+      } else if (personaKey === 'hype') {
+        this.bodyEl.setAttribute('fill', 'url(#grad-hype)');
       } else {
-        this.bodyEl.setAttribute('fill', 'url(#grad-prag)');
+        this.bodyEl.setAttribute('fill', 'url(#grad-stern)');
       }
     }
 
+    if (this.beretEl) {
+      this.beretEl.style.display = personaKey === 'sergeant' ? 'block' : 'none';
+    }
+
     if (this.headbandEl) {
-      this.headbandEl.style.display = personaKey === 'sergeant' ? 'block' : 'none';
+      this.headbandEl.style.display = personaKey === 'hype' ? 'block' : 'none';
     }
 
     if (this.glassesEl) {
-      this.glassesEl.style.display = personaKey === 'architect' ? 'block' : 'none';
+      this.glassesEl.style.display = personaKey === 'mentor' ? 'block' : 'none';
     }
 
     if (this.accentRingEl) {
@@ -241,10 +238,6 @@ export class CoachAvatar {
     }
   }
 
-  /**
-   * Animates coach mouth speaking.
-   * @param {boolean} speaking
-   */
   setSpeaking(speaking) {
     this.isSpeaking = Boolean(speaking);
     if (this.avatarSvg) {
@@ -264,14 +257,8 @@ export class CoachAvatar {
     }
   }
 
-  /**
-   * Speaks given text in character.
-   * @param {string} text
-   * @param {object} persona
-   * @param {Function} [onDone]
-   */
   speak(text, persona = null, onDone = null) {
-    const activePersona = persona || PERSONAS[this.personaKey] || PERSONAS.pragmatist;
+    const activePersona = persona || PERSONAS[this.personaKey] || PERSONAS.sergeant;
 
     speechEngine.speak(
       text,
@@ -291,4 +278,3 @@ export class CoachAvatar {
 }
 
 export const coachAvatar = new CoachAvatar();
-

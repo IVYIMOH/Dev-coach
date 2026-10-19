@@ -1,5 +1,5 @@
 /**
- * Dev Coach - Streak & Challenge Logic (Client ES Module)
+ * Design Coach - Streak & Portfolio Challenge Logic (Client ES Module)
  * A day counts as completed ONLY if all its tasks are marked done (and it has at least 1 task).
  */
 
@@ -60,6 +60,7 @@ export function calculateStreak(tasks, currentDay = 1) {
   }
 
   const progressPercent = Math.round((completedDays.length / 21) * 100);
+  const shippedArtifacts = safeTasks.filter(t => t.type === 'ship' && t.done);
 
   return {
     currentStreak,
@@ -67,7 +68,8 @@ export function calculateStreak(tasks, currentDay = 1) {
     completedDays,
     totalCompletedDays: completedDays.length,
     dayStatus,
-    progressPercent
+    progressPercent,
+    shippedArtifactsCount: shippedArtifacts.length
   };
 }
 
@@ -85,10 +87,20 @@ export function getWeeklyStats(tasks, weekNumber) {
   }
 
   const weekTitles = {
-    1: 'Week 1: Foundations & Architecture',
-    2: 'Week 2: Core Product & Polish',
-    3: 'Week 3: Production, Scale & Launch'
+    1: 'Week 1: Research, Strategy & Architecture',
+    2: 'Week 2: Figma Mastery & Iterative Prototyping',
+    3: 'Week 3: Accessibility, Systems & Portfolio Storytelling'
   };
+
+  const shippedArtifacts = weekTasks
+    .filter(t => t.type === 'ship')
+    .map(t => ({
+      id: t.id,
+      day: t.day,
+      title: t.title,
+      done: Boolean(t.done),
+      proof: t.proof || ''
+    }));
 
   return {
     week,
@@ -100,7 +112,7 @@ export function getWeeklyStats(tasks, weekNumber) {
     completedTasks: doneTasks.length,
     totalTasks: weekTasks.length,
     isComplete: completedDaysCount === 7,
-    percent: weekTasks.length ? Math.round((doneTasks.length / weekTasks.length) * 100) : 0
+    percent: weekTasks.length ? Math.round((doneTasks.length / weekTasks.length) * 100) : 0,
+    shippedArtifacts
   };
 }
-

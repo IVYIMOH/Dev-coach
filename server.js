@@ -63,8 +63,8 @@ app.post('/api/chat', async (req, res) => {
     }
 
     // Validate persona
-    const validPersonas = ['pragmatist', 'sergeant', 'architect'];
-    const safePersona = validPersonas.includes(persona) ? persona : 'pragmatist';
+    const validPersonas = ['sergeant', 'mentor', 'hype'];
+    const safePersona = validPersonas.includes(persona) ? persona : 'sergeant';
 
     // Validate currentDay
     const safeDay = Math.min(21, Math.max(1, Number(currentDay) || 1));

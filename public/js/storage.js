@@ -1,18 +1,19 @@
 /**
- * Dev Coach - Storage Module
+ * Design Coach - Storage Module
  * Persistence interface wrapping localStorage.
- * Structured with async methods so it can easily swap to SQLite or Postgres later.
+ * Async methods for future SQLite / Postgres migration.
+ * Handles JSON progress backup and schema-validated import.
  */
 
 import { INITIAL_TASKS } from './initial-tasks.js';
 
-const STORAGE_KEY = 'dev_coach_state_v2';
+const STORAGE_KEY = 'design_coach_state_v3';
 
 export function getDefaultState() {
   return {
-    version: 2,
+    version: 3,
     currentDay: 1,
-    persona: 'pragmatist',
+    persona: 'sergeant',
     theme: 'light',
     soundMuted: false,
     notificationsEnabled: false,
@@ -24,8 +25,8 @@ export function getDefaultState() {
       {
         id: 'msg-welcome',
         role: 'ai',
-        sender: 'Alex Cole',
-        text: "Welcome to Dev Coach! You've got 21 days to level up from dev to product engineer. Day 1 is loaded on your board. Chat with me in plain English—tell me what you completed, ask me to add tasks, or tap 'Daily Standup' to plan your sprint.",
+        sender: 'Sergeant Stern',
+        text: "Welcome to Design Coach! You've got 21 days to transition from a visual decorator to a high-impact Product Designer. Every day has 3 tasks: Learn (45m), Practice, and Ship. I demand proof before I sign off on your Ship tasks. Chat with me, drop Figma links, run Standup, or request a Design Critique!",
         timestamp: new Date().toISOString()
       }
     ],
@@ -52,7 +53,15 @@ export const Storage = {
         return initial;
       }
       const parsed = JSON.parse(raw);
-      // Merge defaults for any missing keys
+
+      // Verify task format matches product designer curriculum with types
+      const isDesignCurriculum = Array.isArray(parsed.tasks) && parsed.tasks.some(t => t.type === 'ship');
+      if (!isDesignCurriculum) {
+        const fresh = getDefaultState();
+        await this.setState(fresh);
+        return fresh;
+      }
+
       return {
         ...getDefaultState(),
         ...parsed,
@@ -101,7 +110,7 @@ export const Storage = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `dev-coach-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `design-coach-backup-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -132,8 +141,10 @@ export const Storage = {
       const sanitizedTasks = data.tasks.map((t, idx) => ({
         id: String(t.id || `task-${idx}`),
         day: Math.min(21, Math.max(1, Number(t.day) || 1)),
+        type: ['learn', 'practice', 'ship'].includes(String(t.type).toLowerCase()) ? String(t.type).toLowerCase() : 'practice',
         title: String(t.title || 'Untitled task').slice(0, 200),
         done: Boolean(t.done),
+        proof: t.proof ? String(t.proof).slice(0, 500) : '',
         note: t.note ? String(t.note).slice(0, 500) : ''
       }));
 
@@ -151,4 +162,3 @@ export const Storage = {
     }
   }
 };
-
