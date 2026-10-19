@@ -32,12 +32,18 @@ test('validateSingleAction validates ADD_TASK day boundaries, type, and schema',
   assert.equal(validAdd.action.data.title, 'Sketch onboarding flow');
   assert.equal(validAdd.action.data.proof, 'https://figma.com/test');
 
-  // Day out of 1-21 range
+  // Day out of 1-18 range
   const invalidDay = validateSingleAction({
     type: 'ADD_TASK',
-    data: { day: 22, title: 'Day 22 task' }
+    data: { day: 19, title: 'Day 19 task' }
   });
   assert.equal(invalidDay.valid, false);
+
+  const validDay18 = validateSingleAction({
+    type: 'ADD_TASK',
+    data: { day: 18, title: 'Day 18 graduation' }
+  });
+  assert.equal(validDay18.valid, true);
 
   const invalidDayZero = validateSingleAction({
     type: 'ADD_TASK',

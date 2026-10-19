@@ -61,7 +61,7 @@ test('getWeeklyStats aggregates correctly and provides portfolio shipped artifac
   const stats = getWeeklyStats(tasks, 1);
   assert.equal(stats.week, 1);
   assert.equal(stats.startDay, 1);
-  assert.equal(stats.endDay, 7);
+  assert.equal(stats.endDay, 6);
   assert.equal(stats.shippedArtifacts.length, 2);
   assert.equal(stats.shippedArtifacts[0].title, 'Problem Canvas');
   assert.equal(stats.shippedArtifacts[0].done, true);

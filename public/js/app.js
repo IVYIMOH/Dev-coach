@@ -166,7 +166,7 @@ class DesignCoachApp {
       const dayBtn = e.target.closest('.day-pill');
       if (dayBtn) {
         const day = Number(dayBtn.getAttribute('data-day'));
-        if (day >= 1 && day <= 21) {
+        if (day >= 1 && day <= 18) {
           this.selectedDay = day;
           this.renderDayGrid();
           this.renderTaskList();
@@ -242,7 +242,7 @@ class DesignCoachApp {
     });
 
     document.getElementById('resetDataBtn')?.addEventListener('click', async () => {
-      if (confirm('Reset all 21-day Design Coach tasks and progress back to initial curriculum?')) {
+      if (confirm('Reset all 18-day Design Coach tasks and progress back to initial curriculum?')) {
         this.state = await Storage.resetState();
         this.selectedDay = 1;
         this.renderAll();
@@ -305,7 +305,7 @@ class DesignCoachApp {
 
     while (container.firstChild) container.removeChild(container.firstChild);
 
-    for (let day = 1; day <= 21; day++) {
+    for (let day = 1; day <= 18; day++) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'day-pill';
@@ -490,24 +490,24 @@ class DesignCoachApp {
     if (longestVal) longestVal.textContent = `Best: ${stats.longestStreak} Days`;
 
     const progressVal = document.getElementById('totalProgressVal');
-    if (progressVal) progressVal.textContent = `${stats.totalCompletedDays}/21 Days (${stats.progressPercent}%) • ${stats.shippedArtifactsCount} Shipped Artifacts`;
+    if (progressVal) progressVal.textContent = `${stats.totalCompletedDays}/18 Days (${stats.progressPercent}%) • ${stats.shippedArtifactsCount} Shipped Artifacts`;
 
     const progressBar = document.getElementById('streakProgressBar');
     if (progressBar) progressBar.style.width = `${stats.progressPercent}%`;
 
-    // Weekly Recap with Portfolio Progress
-    const currentWeek = Math.min(3, Math.ceil(this.state.currentDay / 7));
-    const weekStats = getWeeklyStats(this.state.tasks, currentWeek);
+    // Sprint Recap with Portfolio Progress (3 Sprints of 6 Days)
+    const currentSprint = Math.min(3, Math.ceil(this.state.currentDay / 6));
+    const sprintStats = getWeeklyStats(this.state.tasks, currentSprint);
 
     const recapTitle = document.getElementById('weeklyRecapTitle');
-    if (recapTitle) recapTitle.textContent = weekStats.title;
+    if (recapTitle) recapTitle.textContent = sprintStats.title;
 
     const recapStats = document.getElementById('weeklyRecapStats');
     if (recapStats) {
-      recapStats.textContent = `${weekStats.completedDays}/7 days complete • ${weekStats.completedTasks}/${weekStats.totalTasks} tasks finished (${weekStats.percent}%)`;
+      recapStats.textContent = `${sprintStats.completedDays}/6 days complete • ${sprintStats.completedTasks}/${sprintStats.totalTasks} tasks finished (${sprintStats.percent}%)`;
     }
 
-    // Portfolio Progress Line in Weekly Recap
+    // Portfolio Progress Line in Sprint Recap
     const portfolioContainer = document.getElementById('weeklyPortfolioProgress');
     if (portfolioContainer) {
       while (portfolioContainer.firstChild) portfolioContainer.removeChild(portfolioContainer.firstChild);
@@ -517,11 +517,11 @@ class DesignCoachApp {
       header.textContent = 'Portfolio Progress (Shipped Artifacts):';
       portfolioContainer.appendChild(header);
 
-      const shipped = weekStats.shippedArtifacts.filter(a => a.done);
+      const shipped = sprintStats.shippedArtifacts.filter(a => a.done);
       if (shipped.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'portfolio-empty-note';
-        empty.textContent = 'No artifacts shipped yet this week. Complete your Ship tasks with proof!';
+        empty.textContent = 'No artifacts shipped yet this sprint. Complete your Ship tasks with proof!';
         portfolioContainer.appendChild(empty);
       } else {
         const list = document.createElement('ul');
@@ -674,7 +674,7 @@ class DesignCoachApp {
       } else if (type === 'ADD_TASK' && data?.title) {
         const newTask = {
           id: `task-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
-          day: Math.min(21, Math.max(1, Number(data.day) || this.selectedDay)),
+          day: Math.min(18, Math.max(1, Number(data.day) || this.selectedDay)),
           type: ['learn', 'practice', 'ship'].includes(data.type) ? data.type : 'practice',
           title: String(data.title).slice(0, 200),
           done: false,
@@ -701,17 +701,17 @@ class DesignCoachApp {
   }
 
   requestWeeklyRecap() {
-    const currentWeek = Math.min(3, Math.ceil(this.state.currentDay / 7));
-    const stats = getWeeklyStats(this.state.tasks, currentWeek);
+    const currentSprint = Math.min(3, Math.ceil(this.state.currentDay / 6));
+    const stats = getWeeklyStats(this.state.tasks, currentSprint);
     const shippedTitles = stats.shippedArtifacts.filter(a => a.done).map(a => `• Day ${a.day}: ${a.title} (Proof: ${a.proof || 'Attached'})`).join('\n');
 
     const query = [
-      `Weekly Recap & Portfolio Review Request for ${stats.title}:`,
-      `• Challenge Days Complete: ${stats.completedDays} of 7`,
+      `Sprint Recap & Portfolio Review Request for ${stats.title}:`,
+      `• Sprint Days Complete: ${stats.completedDays} of 6`,
       `• Tasks Finished: ${stats.completedTasks} of ${stats.totalTasks} (${stats.percent}%)`,
       `• Portfolio Shipped Artifacts:`,
-      shippedTitles || 'None shipped yet this week',
-      `Please provide an in-persona critique of our week's momentum and advice for the next sprint.`
+      shippedTitles || 'None shipped yet this sprint',
+      `Please provide an in-persona critique of our sprint momentum and advice for the next challenge.`
     ].join('\n');
 
     this.sendChatMessage(query);

@@ -652,11 +652,11 @@ body {
   border-color: var(--accent);
 }
 
-/* 21-Day Grid */
+/* 18-Day Grid (3 rows of 6 days) */
 .day-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
   margin-top: 8px;
 }
 
