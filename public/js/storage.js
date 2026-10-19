@@ -7,11 +7,11 @@
 
 import { INITIAL_TASKS } from './initial-tasks.js';
 
-const STORAGE_KEY = 'design_coach_state_v3';
+const STORAGE_KEY = 'design_coach_state_v4';
 
 export function getDefaultState() {
   return {
-    version: 3,
+    version: 4,
     currentDay: 1,
     persona: 'sergeant',
     theme: 'light',
@@ -26,7 +26,7 @@ export function getDefaultState() {
         id: 'msg-welcome',
         role: 'ai',
         sender: 'Sergeant Stern',
-        text: "Welcome to Design Coach! You've got 21 days to transition from a visual decorator to a high-impact Product Designer. Every day has 3 tasks: Learn (45m), Practice, and Ship. I demand proof before I sign off on your Ship tasks. Chat with me, drop Figma links, run Standup, or request a Design Critique!",
+        text: "Welcome to Design Coach! You've got 18 days left on the clock. No fluff, no passive tutorials—only shipped Figma frames, user tests, and real artifacts. Every day has 3 tasks: Learn (45m), Practice, and Ship. I demand proof before I sign off on your Ship tasks. Chat with me, drop Figma links, run Standup, or request a Design Critique!",
         timestamp: new Date().toISOString()
       }
     ],
@@ -54,9 +54,9 @@ export const Storage = {
       }
       const parsed = JSON.parse(raw);
 
-      // Verify task format matches product designer curriculum with types
-      const isDesignCurriculum = Array.isArray(parsed.tasks) && parsed.tasks.some(t => t.type === 'ship');
-      if (!isDesignCurriculum) {
+      // Verify task format matches 18-day product designer curriculum
+      const is18DayCurriculum = Array.isArray(parsed.tasks) && parsed.tasks.some(t => t.id === 'd18-ship');
+      if (!is18DayCurriculum) {
         const fresh = getDefaultState();
         await this.setState(fresh);
         return fresh;
@@ -110,7 +110,7 @@ export const Storage = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `design-coach-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `design-coach-18day-backup-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -140,7 +140,7 @@ export const Storage = {
       // Sanitize imported tasks
       const sanitizedTasks = data.tasks.map((t, idx) => ({
         id: String(t.id || `task-${idx}`),
-        day: Math.min(21, Math.max(1, Number(t.day) || 1)),
+        day: Math.min(18, Math.max(1, Number(t.day) || 1)),
         type: ['learn', 'practice', 'ship'].includes(String(t.type).toLowerCase()) ? String(t.type).toLowerCase() : 'practice',
         title: String(t.title || 'Untitled task').slice(0, 200),
         done: Boolean(t.done),
@@ -152,7 +152,7 @@ export const Storage = {
         ...getDefaultState(),
         ...data,
         tasks: sanitizedTasks,
-        currentDay: Math.min(21, Math.max(1, Number(data.currentDay) || 1))
+        currentDay: Math.min(18, Math.max(1, Number(data.currentDay) || 1))
       };
 
       await this.setState(merged);

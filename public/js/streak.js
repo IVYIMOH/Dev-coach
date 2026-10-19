@@ -1,7 +1,10 @@
 /**
- * Design Coach - Streak & Portfolio Challenge Logic (Client ES Module)
+ * Design Coach - 18-Day Streak & Portfolio Challenge Logic (Client ES Module)
  * A day counts as completed ONLY if all its tasks are marked done (and it has at least 1 task).
  */
+
+export const TOTAL_CHALLENGE_DAYS = 18;
+export const DAYS_PER_SPRINT = 6;
 
 export function isDayCompleted(tasks, dayNumber) {
   if (!Array.isArray(tasks) || typeof dayNumber !== 'number') return false;
@@ -12,12 +15,12 @@ export function isDayCompleted(tasks, dayNumber) {
 
 export function calculateStreak(tasks, currentDay = 1) {
   const safeTasks = Array.isArray(tasks) ? tasks : [];
-  const safeCurrentDay = Math.min(21, Math.max(1, Number(currentDay) || 1));
+  const safeCurrentDay = Math.min(TOTAL_CHALLENGE_DAYS, Math.max(1, Number(currentDay) || 1));
 
   const dayStatus = {};
   const completedDays = [];
 
-  for (let d = 1; d <= 21; d++) {
+  for (let d = 1; d <= TOTAL_CHALLENGE_DAYS; d++) {
     const completed = isDayCompleted(safeTasks, d);
     dayStatus[d] = completed;
     if (completed) {
@@ -25,10 +28,10 @@ export function calculateStreak(tasks, currentDay = 1) {
     }
   }
 
-  // Longest streak across 21 days
+  // Longest streak across 18 days
   let longestStreak = 0;
   let runningStreak = 0;
-  for (let d = 1; d <= 21; d++) {
+  for (let d = 1; d <= TOTAL_CHALLENGE_DAYS; d++) {
     if (dayStatus[d]) {
       runningStreak++;
       if (runningStreak > longestStreak) {
@@ -59,7 +62,7 @@ export function calculateStreak(tasks, currentDay = 1) {
     }
   }
 
-  const progressPercent = Math.round((completedDays.length / 21) * 100);
+  const progressPercent = Math.round((completedDays.length / TOTAL_CHALLENGE_DAYS) * 100);
   const shippedArtifacts = safeTasks.filter(t => t.type === 'ship' && t.done);
 
   return {
@@ -69,30 +72,31 @@ export function calculateStreak(tasks, currentDay = 1) {
     totalCompletedDays: completedDays.length,
     dayStatus,
     progressPercent,
-    shippedArtifactsCount: shippedArtifacts.length
+    shippedArtifactsCount: shippedArtifacts.length,
+    totalChallengeDays: TOTAL_CHALLENGE_DAYS
   };
 }
 
-export function getWeeklyStats(tasks, weekNumber) {
-  const week = Math.min(3, Math.max(1, Number(weekNumber) || 1));
-  const startDay = (week - 1) * 7 + 1;
-  const endDay = startDay + 6;
+export function getWeeklyStats(tasks, sprintNumber) {
+  const sprint = Math.min(3, Math.max(1, Number(sprintNumber) || 1));
+  const startDay = (sprint - 1) * DAYS_PER_SPRINT + 1;
+  const endDay = startDay + DAYS_PER_SPRINT - 1;
 
-  const weekTasks = (tasks || []).filter(t => t.day >= startDay && t.day <= endDay);
-  const doneTasks = weekTasks.filter(t => t.done);
+  const sprintTasks = (tasks || []).filter(t => t.day >= startDay && t.day <= endDay);
+  const doneTasks = sprintTasks.filter(t => t.done);
 
   let completedDaysCount = 0;
   for (let d = startDay; d <= endDay; d++) {
     if (isDayCompleted(tasks, d)) completedDaysCount++;
   }
 
-  const weekTitles = {
-    1: 'Week 1: Research, Strategy & Architecture',
-    2: 'Week 2: Figma Mastery & Iterative Prototyping',
-    3: 'Week 3: Accessibility, Systems & Portfolio Storytelling'
+  const sprintTitles = {
+    1: 'Sprint 1 (Days 1–6): Problem Discovery & Strategic Architecture',
+    2: 'Sprint 2 (Days 7–12): Figma Systems, Visual Polish & Prototyping',
+    3: 'Sprint 3 (Days 13–18): Hardening, Engineering Handoff & Portfolio Launch'
   };
 
-  const shippedArtifacts = weekTasks
+  const shippedArtifacts = sprintTasks
     .filter(t => t.type === 'ship')
     .map(t => ({
       id: t.id,
@@ -103,16 +107,17 @@ export function getWeeklyStats(tasks, weekNumber) {
     }));
 
   return {
-    week,
-    title: weekTitles[week],
+    week: sprint,
+    sprint,
+    title: sprintTitles[sprint],
     startDay,
     endDay,
     completedDays: completedDaysCount,
-    totalDays: 7,
+    totalDays: DAYS_PER_SPRINT,
     completedTasks: doneTasks.length,
-    totalTasks: weekTasks.length,
-    isComplete: completedDaysCount === 7,
-    percent: weekTasks.length ? Math.round((doneTasks.length / weekTasks.length) * 100) : 0,
+    totalTasks: sprintTasks.length,
+    isComplete: completedDaysCount === DAYS_PER_SPRINT,
+    percent: sprintTasks.length ? Math.round((doneTasks.length / sprintTasks.length) * 100) : 0,
     shippedArtifacts
   };
 }
